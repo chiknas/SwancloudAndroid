@@ -18,46 +18,17 @@
         app:layout_constraintRight_toRightOf="parent"
         app:srcCompat="@drawable/logo" />
 
-    <EditText
-        android:id="@+id/username_field"
-        android:layout_width="285dp"
-        android:layout_height="58dp"
-        android:layout_marginTop="24dp"
-        android:background="#1A424242"
-        android:drawableLeft="@drawable/ic_baseline_person_24"
-        android:drawablePadding="20dp"
-        android:padding="20dp"
-        android:hint="Username"
-        android:ems="10"
-        android:inputType="textEmailAddress"
-        app:layout_constraintStart_toStartOf="@+id/imageView"
-        app:layout_constraintTop_toBottomOf="@+id/imageView" />
-
-    <EditText
-        android:id="@+id/password_field"
-        android:layout_width="285dp"
-        android:layout_height="58dp"
-        android:layout_marginTop="8dp"
-        android:drawableLeft="@drawable/ic_baseline_key_24"
-        android:background="#1A424242"
-        android:hint="Password"
-        android:drawablePadding="20dp"
-        android:padding="20dp"
-        android:ems="10"
-        android:inputType="textPassword"
-        app:layout_constraintStart_toStartOf="@+id/imageView"
-        app:layout_constraintTop_toBottomOf="@+id/username_field" />
-
     <Button
-        android:id="@+id/login_button"
+        android:id="@+id/sync_button"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="128dp"
-        android:layout_marginTop="36dp"
-        android:background="#464646"
+        android:layout_marginTop="60dp"
+        android:background="@color/design_default_color_primary"
         android:shadowColor="@color/black"
-        android:text="Log in"
+        android:drawableLeft="@drawable/ic_baseline_sync_24"
+        android:text="Sync"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/password_field" />
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

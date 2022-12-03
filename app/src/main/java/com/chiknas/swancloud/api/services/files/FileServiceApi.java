@@ -1,7 +1,5 @@
 package com.chiknas.swancloud.api.services.files;
 
-import com.chiknas.swancloud.api.services.authentication.JwtToken;
-
 import java.util.List;
 
 import retrofit2.Call;

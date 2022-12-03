@@ -6,7 +6,7 @@ import retrofit2.http.POST;
 
 public interface AuthenticationServiceApi {
 
-    @POST("/auth/signin")
-    Call<JwtToken> authenticateUser(@Body LoginRequest loginRequest);
+    @POST("/auth/refreshtoken")
+    Call<RefreshTokenResponse> refreshAccessToken(@Body RefreshTokenRequest refreshTokenRequest);
 
 }
