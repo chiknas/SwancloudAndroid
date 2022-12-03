@@ -1,4 +1,4 @@
-package com.chiknas.swancloud.api.services;
+package com.chiknas.swancloud.api.services.authentication;
 
 public class LoginRequest {
 
