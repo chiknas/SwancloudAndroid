@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.chiknas.swancloud.api.ApiService;
 import com.chiknas.swancloud.api.services.authentication.RefreshAccessTokenCallback;
 import com.chiknas.swancloud.api.services.authentication.RefreshTokenRequest;
+import com.chiknas.swancloud.sharedpreferences.AuthenticationSharedPreferences;
 import com.google.gson.Gson;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanIntentResult;
@@ -75,10 +76,10 @@ public class LoginActivity extends AppCompatActivity {
             SharedPreferences swancloudSharedPreferences = getSharedPreferences("swancloud", MODE_PRIVATE);
             swancloudSharedPreferences
                     .edit()
-                    .putString("refresh_token", qrSyncResponse.getRefreshToken())
-                    .putLong("refresh_token_expiry", qrSyncResponse.getExpiryTime())
-                    .putString("email", qrSyncResponse.getEmail())
-                    .putString("base_server_url", qrSyncResponse.getBaseServerUrl())
+                    .putString(AuthenticationSharedPreferences.REFRESH_TOKEN, qrSyncResponse.getRefreshToken())
+                    .putLong(AuthenticationSharedPreferences.REFRESH_TOKEN_EXPIRY, qrSyncResponse.getExpiryTime())
+                    .putString(AuthenticationSharedPreferences.EMAIL, qrSyncResponse.getEmail())
+                    .putString(AuthenticationSharedPreferences.BASE_SERVER_URL, qrSyncResponse.getBaseServerUrl())
                     .apply();
 
             // Get access token from the refresh token

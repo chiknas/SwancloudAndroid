@@ -7,6 +7,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
+import com.chiknas.swancloud.sharedpreferences.AuthenticationSharedPreferences;
+
 import java.util.Optional;
 
 import retrofit2.Call;
@@ -22,7 +26,7 @@ public class RefreshAccessTokenCallback implements Callback<RefreshTokenResponse
     }
 
     @Override
-    public void onResponse(Call<RefreshTokenResponse> call, Response<RefreshTokenResponse> response) {
+    public void onResponse(@NonNull Call<RefreshTokenResponse> call, Response<RefreshTokenResponse> response) {
 
         Optional<RefreshTokenResponse> responseBody = Optional.ofNullable(response.body());
         if (!response.isSuccessful() || !responseBody.isPresent()) {
@@ -35,13 +39,13 @@ public class RefreshAccessTokenCallback implements Callback<RefreshTokenResponse
         SharedPreferences swancloudSharedPreferences = context.getSharedPreferences("swancloud", MODE_PRIVATE);
         swancloudSharedPreferences
                 .edit()
-                .putString("access_token", jwtToken.getAccessToken())
-                .putLong("access_token_expiry", jwtToken.getAccessTokenExpiry())
+                .putString(AuthenticationSharedPreferences.ACCESS_TOKEN, jwtToken.getAccessToken())
+                .putLong(AuthenticationSharedPreferences.ACCESS_TOKEN_EXPIRY, jwtToken.getAccessTokenExpiry())
                 .apply();
     }
 
     @Override
-    public void onFailure(Call<RefreshTokenResponse> call, Throwable t) {
+    public void onFailure(@NonNull Call<RefreshTokenResponse> call, @NonNull Throwable t) {
         Toast.makeText(context, "Nope!", LENGTH_SHORT).show();
     }
 }
