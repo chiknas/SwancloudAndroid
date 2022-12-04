@@ -2,8 +2,12 @@ package com.chiknas.swancloud.api.services.files;
 
 import java.util.List;
 
+import okhttp3.MultipartBody;
 import retrofit2.Call;
 import retrofit2.http.GET;
+import retrofit2.http.Multipart;
+import retrofit2.http.POST;
+import retrofit2.http.Part;
 import retrofit2.http.Query;
 
 public interface FileServiceApi {
@@ -13,5 +17,9 @@ public interface FileServiceApi {
             @Query("limit") int limit,
             @Query("offset") int offset
     );
+
+    @Multipart
+    @POST("/api/upload")
+    Call<Void> uploadFiles(@Part List<MultipartBody.Part> files);
 
 }

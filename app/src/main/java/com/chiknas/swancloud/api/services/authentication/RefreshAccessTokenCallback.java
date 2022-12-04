@@ -55,7 +55,9 @@ public class RefreshAccessTokenCallback implements Callback<RefreshTokenResponse
                 .setRequiredNetworkType(NetworkType.UNMETERED)
                 .build();
         PeriodicWorkRequest periodicFileSyncWorkRequest = new PeriodicWorkRequest.Builder(FileSyncPeriodicTask.class, 1, TimeUnit.HOURS).setConstraints(constraints).build();
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork("FileSyncPeriodicTask", ExistingPeriodicWorkPolicy.KEEP, periodicFileSyncWorkRequest);
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork("FileSyncPeriodicTask", ExistingPeriodicWorkPolicy.REPLACE, periodicFileSyncWorkRequest);
+//        OneTimeWorkRequest periodicFileSyncWorkRequest = new OneTimeWorkRequest.Builder(FileSyncPeriodicTask.class).build();
+//        WorkManager.getInstance(context).enqueueUniqueWork("FileSyncTask2", ExistingWorkPolicy.REPLACE, periodicFileSyncWorkRequest);
     }
 
     @Override

@@ -7,6 +7,8 @@ import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
 
+import com.chiknas.swancloud.sharedpreferences.AuthenticationSharedPreferences;
+
 import java.io.IOException;
 import java.util.Optional;
 
@@ -29,7 +31,7 @@ public class AuthenticationInterceptor implements Interceptor {
     public Response intercept(@NonNull Chain chain) throws IOException {
         SharedPreferences swancloudSharedPreferences = context.getSharedPreferences("swancloud", MODE_PRIVATE);
         Request request =
-                Optional.ofNullable(swancloudSharedPreferences.getString("access_token", null))
+                Optional.ofNullable(swancloudSharedPreferences.getString(AuthenticationSharedPreferences.ACCESS_TOKEN, null))
                         .map(accessToken -> chain.request().newBuilder()
                                 .addHeader("Authorization", "Bearer " + accessToken)
                                 .build()).orElse(chain.request());
