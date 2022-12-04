@@ -8,10 +8,17 @@ import android.content.SharedPreferences;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.work.Constraints;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import com.chiknas.swancloud.sharedpreferences.AuthenticationSharedPreferences;
+import com.chiknas.swancloud.tasks.FileSyncPeriodicTask;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -42,6 +49,13 @@ public class RefreshAccessTokenCallback implements Callback<RefreshTokenResponse
                 .putString(AuthenticationSharedPreferences.ACCESS_TOKEN, jwtToken.getAccessToken())
                 .putLong(AuthenticationSharedPreferences.ACCESS_TOKEN_EXPIRY, jwtToken.getAccessTokenExpiry())
                 .apply();
+
+        // Start Workers
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.UNMETERED)
+                .build();
+        PeriodicWorkRequest periodicFileSyncWorkRequest = new PeriodicWorkRequest.Builder(FileSyncPeriodicTask.class, 1, TimeUnit.HOURS).setConstraints(constraints).build();
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork("FileSyncPeriodicTask", ExistingPeriodicWorkPolicy.KEEP, periodicFileSyncWorkRequest);
     }
 
     @Override
