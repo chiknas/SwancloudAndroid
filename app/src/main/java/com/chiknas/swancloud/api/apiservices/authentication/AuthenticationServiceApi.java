@@ -1,4 +1,4 @@
-package com.chiknas.swancloud.api.services.authentication;
+package com.chiknas.swancloud.api.apiservices.authentication;
 
 import retrofit2.Call;
 import retrofit2.http.Body;

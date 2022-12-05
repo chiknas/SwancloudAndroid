@@ -1,6 +1,8 @@
 package com.chiknas.swancloud.workers;
 
 
+import static com.chiknas.swancloud.services.MediaStoreService.COLLECTION_LOCATION;
+
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
@@ -13,7 +15,8 @@ import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
 import com.chiknas.swancloud.api.ApiService;
-import com.chiknas.swancloud.api.services.user.CurrentUserDetails;
+import com.chiknas.swancloud.api.apiservices.user.CurrentUserDetails;
+import com.chiknas.swancloud.services.MediaStoreService;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,22 +40,24 @@ import retrofit2.Response;
  *
  * Call this worker using one of the following methods:
  * Periodic work:
- * PeriodicWorkRequest periodicFileSyncWorkRequest = new PeriodicWorkRequest.Builder(FileSyncPeriodicTask.class, 1, TimeUnit.HOURS).setConstraints(constraints).build();
- * WorkManager.getInstance(context).enqueueUniquePeriodicWork("FileSyncPeriodicTask", ExistingPeriodicWorkPolicy.REPLACE, periodicFileSyncWorkRequest);
+ * PeriodicWorkRequest periodicFileSyncWorkRequest = new PeriodicWorkRequest.Builder(FileSyncWorker.class, 1, TimeUnit.HOURS).setConstraints(constraints).build();
+ * WorkManager.getInstance(context).enqueueUniquePeriodicWork("FileSyncWorker", ExistingPeriodicWorkPolicy.REPLACE, periodicFileSyncWorkRequest);
  *
  * One time work:
- * OneTimeWorkRequest periodicFileSyncWorkRequest = new OneTimeWorkRequest.Builder(FileSyncPeriodicTask.class).build();
- * WorkManager.getInstance(context).enqueueUniqueWork("FileSyncTask2", ExistingWorkPolicy.REPLACE, periodicFileSyncWorkRequest);
+ * OneTimeWorkRequest periodicFileSyncWorkRequest = new OneTimeWorkRequest.Builder(FileSyncWorker.class).build();
+ * WorkManager.getInstance(context).enqueueUniqueWork("FileSyncWorker", ExistingWorkPolicy.REPLACE, periodicFileSyncWorkRequest);
  */
 public class FileSyncWorker extends Worker {
 
     private final ApiService apiService;
     private final ContentResolver resolver;
+    private final MediaStoreService mediaStoreService;
 
     public FileSyncWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         this.apiService = new ApiService(getApplicationContext());
         this.resolver = getApplicationContext().getContentResolver();
+        this.mediaStoreService = new MediaStoreService(getApplicationContext());
     }
 
     @NonNull
@@ -65,26 +70,10 @@ public class FileSyncWorker extends Worker {
             return Result.failure();
         }
 
-        // Select only files that are created after
+        // Select only files that are created after the last uploaded file
         LocalDate lastUploadedFileDate = currentUserDetails.get().getLastUploadedFileDate();
-        String selection = getLatestMedia(lastUploadedFileDate);
 
-        // Retrieve the files id
-        String[] projection = new String[]{
-                MediaStore.Files.FileColumns._ID,
-                MediaStore.Files.FileColumns.DISPLAY_NAME
-        };
-
-        // Sort by the oldest file first
-        String sortOrder = MediaStore.Files.FileColumns.DATE_TAKEN + " ASC";
-
-        try (Cursor cursor = getApplicationContext().getContentResolver().query(
-                getCollectionLocation(),
-                projection,
-                selection,
-                null,
-                sortOrder
-        )) {
+        try (Cursor cursor = mediaStoreService.getMediaTakenAfter(lastUploadedFileDate)) {
             uploadFiles(cursor);
         } catch (IOException e) {
             return Result.failure();
@@ -92,16 +81,6 @@ public class FileSyncWorker extends Worker {
 
 
         return Result.success();
-    }
-
-    private String getLatestMedia(LocalDate lastUploadedFileDate){
-        return "(" + MediaStore.Files.FileColumns.MEDIA_TYPE + "="
-                + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
-                + " OR "
-                + MediaStore.Files.FileColumns.MEDIA_TYPE + "="
-                + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO + ")"
-                + " AND "
-                + MediaStore.Files.FileColumns.DATE_TAKEN + " >= " + lastUploadedFileDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
     private void uploadFiles(Cursor cursor) throws IOException {
@@ -113,7 +92,7 @@ public class FileSyncWorker extends Worker {
             long id = cursor.getLong(idColumn);
             String name = cursor.getString(nameColumn);
 
-            Uri contentUri = ContentUris.withAppendedId(getCollectionLocation(), id);
+            Uri contentUri = ContentUris.withAppendedId(COLLECTION_LOCATION, id);
 
             uploadFile(name, contentUri);
         }
@@ -145,9 +124,5 @@ public class FileSyncWorker extends Worker {
         } catch (Exception ignored) {
         }
         return Optional.empty();
-    }
-
-    private Uri getCollectionLocation() {
-        return MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL);
     }
 }

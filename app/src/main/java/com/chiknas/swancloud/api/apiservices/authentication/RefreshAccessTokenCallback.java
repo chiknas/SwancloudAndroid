@@ -1,4 +1,4 @@
-package com.chiknas.swancloud.api.services.authentication;
+package com.chiknas.swancloud.api.apiservices.authentication;
 
 import static android.content.Context.MODE_PRIVATE;
 import static android.widget.Toast.LENGTH_SHORT;
@@ -56,7 +56,7 @@ public class RefreshAccessTokenCallback implements Callback<RefreshTokenResponse
                 .build();
 
         PeriodicWorkRequest periodicFileSyncWorkRequest = new PeriodicWorkRequest.Builder(FileSyncWorker.class, 1, TimeUnit.HOURS).setConstraints(constraints).build();
-        WorkManager.getInstance(context).enqueueUniquePeriodicWork("FileSyncPeriodicTask", ExistingPeriodicWorkPolicy.REPLACE, periodicFileSyncWorkRequest);
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork("FileSyncPeriodicTask", ExistingPeriodicWorkPolicy.KEEP, periodicFileSyncWorkRequest);
     }
 
     @Override

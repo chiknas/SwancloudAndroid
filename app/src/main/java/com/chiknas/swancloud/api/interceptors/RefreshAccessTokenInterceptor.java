@@ -5,8 +5,8 @@ import static android.content.Context.MODE_PRIVATE;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import com.chiknas.swancloud.api.services.authentication.RefreshTokenRequest;
-import com.chiknas.swancloud.api.services.authentication.RefreshTokenResponse;
+import com.chiknas.swancloud.api.apiservices.authentication.RefreshTokenRequest;
+import com.chiknas.swancloud.api.apiservices.authentication.RefreshTokenResponse;
 import com.chiknas.swancloud.sharedpreferences.AuthenticationSharedPreferences;
 import com.google.gson.Gson;
 
@@ -42,8 +42,6 @@ public class RefreshAccessTokenInterceptor implements Interceptor {
         if(initialResponse.code() != 403){
             return initialResponse;
         }
-
-        // TODO: isRefreshTokenActive: if not redirect user to login activity
 
         refreshAccessToken(chain);
 

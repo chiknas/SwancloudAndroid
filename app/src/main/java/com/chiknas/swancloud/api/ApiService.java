@@ -7,9 +7,9 @@ import android.content.SharedPreferences;
 
 import com.chiknas.swancloud.api.interceptors.AuthenticationInterceptor;
 import com.chiknas.swancloud.api.interceptors.RefreshAccessTokenInterceptor;
-import com.chiknas.swancloud.api.services.authentication.AuthenticationServiceApi;
-import com.chiknas.swancloud.api.services.files.FileServiceApi;
-import com.chiknas.swancloud.api.services.user.UserApi;
+import com.chiknas.swancloud.api.apiservices.authentication.AuthenticationServiceApi;
+import com.chiknas.swancloud.api.apiservices.files.FileServiceApi;
+import com.chiknas.swancloud.api.apiservices.user.UserApi;
 import com.chiknas.swancloud.sharedpreferences.AuthenticationSharedPreferences;
 
 import okhttp3.OkHttpClient;

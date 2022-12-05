@@ -9,8 +9,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.chiknas.swancloud.api.ApiService;
-import com.chiknas.swancloud.api.services.authentication.RefreshAccessTokenCallback;
-import com.chiknas.swancloud.api.services.authentication.RefreshTokenRequest;
+import com.chiknas.swancloud.api.apiservices.authentication.RefreshAccessTokenCallback;
+import com.chiknas.swancloud.api.apiservices.authentication.RefreshTokenRequest;
 import com.chiknas.swancloud.sharedpreferences.AuthenticationSharedPreferences;
 import com.google.gson.Gson;
 import com.journeyapps.barcodescanner.ScanContract;

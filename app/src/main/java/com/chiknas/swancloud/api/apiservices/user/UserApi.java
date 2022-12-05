@@ -1,4 +1,4 @@
-package com.chiknas.swancloud.api.services.user;
+package com.chiknas.swancloud.api.apiservices.user;
 
 import retrofit2.Call;
 import retrofit2.http.GET;
