@@ -1,4 +1,4 @@
-package com.chiknas.swancloud.tasks;
+package com.chiknas.swancloud.workers;
 
 
 import android.content.ContentResolver;
@@ -6,7 +6,6 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Build;
 import android.provider.MediaStore;
 
 import androidx.annotation.NonNull;
@@ -29,16 +28,28 @@ import okhttp3.RequestBody;
 import retrofit2.Response;
 
 /**
- * If it doesnt work make sure all permissions are given
- * https://medium.com/swlh/periodic-tasks-with-android-workmanager-c901dd9ba7bc
- * https://developer.android.com/training/data-storage/shared/media
+ * WorkManager worker responsible to upload the latest files into the system.
+ * Retrieves the last updated date from the server and then uses that to scan the
+ * phone for any fotos/videos that were taken after that date (meaning they have not been
+ * uploaded yet). Then proceeds to upload each file one by one.
+ * This is preferred instead of a batch upload, in case something goes wrong, we will be able
+ * to resume upload from where we left off by just getting the new lastUploadedFileDate from the server.
+ *
+ * Call this worker using one of the following methods:
+ * Periodic work:
+ * PeriodicWorkRequest periodicFileSyncWorkRequest = new PeriodicWorkRequest.Builder(FileSyncPeriodicTask.class, 1, TimeUnit.HOURS).setConstraints(constraints).build();
+ * WorkManager.getInstance(context).enqueueUniquePeriodicWork("FileSyncPeriodicTask", ExistingPeriodicWorkPolicy.REPLACE, periodicFileSyncWorkRequest);
+ *
+ * One time work:
+ * OneTimeWorkRequest periodicFileSyncWorkRequest = new OneTimeWorkRequest.Builder(FileSyncPeriodicTask.class).build();
+ * WorkManager.getInstance(context).enqueueUniqueWork("FileSyncTask2", ExistingWorkPolicy.REPLACE, periodicFileSyncWorkRequest);
  */
-public class FileSyncPeriodicTask extends Worker {
+public class FileSyncWorker extends Worker {
 
     private final ApiService apiService;
     private final ContentResolver resolver;
 
-    public FileSyncPeriodicTask(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public FileSyncWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         this.apiService = new ApiService(getApplicationContext());
         this.resolver = getApplicationContext().getContentResolver();
@@ -56,21 +67,16 @@ public class FileSyncPeriodicTask extends Worker {
 
         // Select only files that are created after
         LocalDate lastUploadedFileDate = currentUserDetails.get().getLastUploadedFileDate();
-//        String selection =
-//                MediaStore.Video.Media.DATE_TAKEN + " >= " + lastUploadedFileDate +
-//                        " OR " +
-//                        MediaStore.Images.Media.DATE_TAKEN + " >= " + lastUploadedFileDate;
-        String selection = MediaStore.Images.Media.DATE_TAKEN + " >= " + lastUploadedFileDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        String selection = getLatestMedia(lastUploadedFileDate);
 
         // Retrieve the files id
         String[] projection = new String[]{
-//                MediaStore.Video.Media._ID,
-                MediaStore.Images.Media._ID,
-                MediaStore.Images.Media.DISPLAY_NAME
+                MediaStore.Files.FileColumns._ID,
+                MediaStore.Files.FileColumns.DISPLAY_NAME
         };
 
         // Sort by the oldest file first
-        String sortOrder = MediaStore.Images.Media.DATE_TAKEN + " ASC";
+        String sortOrder = MediaStore.Files.FileColumns.DATE_TAKEN + " ASC";
 
         try (Cursor cursor = getApplicationContext().getContentResolver().query(
                 getCollectionLocation(),
@@ -88,17 +94,26 @@ public class FileSyncPeriodicTask extends Worker {
         return Result.success();
     }
 
+    private String getLatestMedia(LocalDate lastUploadedFileDate){
+        return "(" + MediaStore.Files.FileColumns.MEDIA_TYPE + "="
+                + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
+                + " OR "
+                + MediaStore.Files.FileColumns.MEDIA_TYPE + "="
+                + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO + ")"
+                + " AND "
+                + MediaStore.Files.FileColumns.DATE_TAKEN + " >= " + lastUploadedFileDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    }
+
     private void uploadFiles(Cursor cursor) throws IOException {
-        int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID);
-        int nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME);
+        int idColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns._ID);
+        int nameColumn = cursor.getColumnIndexOrThrow(MediaStore.Files.FileColumns.DISPLAY_NAME);
 
         while (cursor.moveToNext()) {
 
             long id = cursor.getLong(idColumn);
             String name = cursor.getString(nameColumn);
 
-            Uri contentUri = ContentUris.withAppendedId(
-                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+            Uri contentUri = ContentUris.withAppendedId(getCollectionLocation(), id);
 
             uploadFile(name, contentUri);
         }
@@ -133,10 +148,6 @@ public class FileSyncPeriodicTask extends Worker {
     }
 
     private Uri getCollectionLocation() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            return MediaStore.Images.Media.getContentUri(MediaStore.VOLUME_EXTERNAL);
-        } else {
-            return MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-        }
+        return MediaStore.Files.getContentUri(MediaStore.VOLUME_EXTERNAL);
     }
 }

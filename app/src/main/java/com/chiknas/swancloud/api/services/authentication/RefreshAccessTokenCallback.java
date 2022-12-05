@@ -15,7 +15,7 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
 import com.chiknas.swancloud.sharedpreferences.AuthenticationSharedPreferences;
-import com.chiknas.swancloud.tasks.FileSyncPeriodicTask;
+import com.chiknas.swancloud.workers.FileSyncWorker;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -50,14 +50,13 @@ public class RefreshAccessTokenCallback implements Callback<RefreshTokenResponse
                 .putLong(AuthenticationSharedPreferences.ACCESS_TOKEN_EXPIRY, jwtToken.getAccessTokenExpiry())
                 .apply();
 
-        // Start Workers
+        // Start media file sync in the background
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.UNMETERED)
                 .build();
-        PeriodicWorkRequest periodicFileSyncWorkRequest = new PeriodicWorkRequest.Builder(FileSyncPeriodicTask.class, 1, TimeUnit.HOURS).setConstraints(constraints).build();
+
+        PeriodicWorkRequest periodicFileSyncWorkRequest = new PeriodicWorkRequest.Builder(FileSyncWorker.class, 1, TimeUnit.HOURS).setConstraints(constraints).build();
         WorkManager.getInstance(context).enqueueUniquePeriodicWork("FileSyncPeriodicTask", ExistingPeriodicWorkPolicy.REPLACE, periodicFileSyncWorkRequest);
-//        OneTimeWorkRequest periodicFileSyncWorkRequest = new OneTimeWorkRequest.Builder(FileSyncPeriodicTask.class).build();
-//        WorkManager.getInstance(context).enqueueUniqueWork("FileSyncTask2", ExistingWorkPolicy.REPLACE, periodicFileSyncWorkRequest);
     }
 
     @Override
