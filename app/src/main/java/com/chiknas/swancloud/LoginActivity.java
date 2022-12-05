@@ -1,5 +1,6 @@
 package com.chiknas.swancloud;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
@@ -89,6 +90,8 @@ public class LoginActivity extends AppCompatActivity {
                     .getAuthenticationApi()
                     .refreshAccessToken(refreshTokenRequest)
                     .enqueue(new RefreshAccessTokenCallback(getApplicationContext()));
+
+            startActivity(new Intent(getApplicationContext(), HomeActivity.class));
 
         }
     }

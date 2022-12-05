@@ -5,8 +5,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.provider.MediaStore;
 
-import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 /**
  * MediaStore service to support functionality around the android mediastore API.
@@ -21,7 +21,7 @@ public class MediaStoreService {
         this.context = context;
     }
 
-    public Cursor getMediaTakenAfter(LocalDate date) {
+    public Cursor getMediaTakenAfter(LocalDateTime date) {
 
         String selection = getMediaSelectionTakenAfter(date);
 
@@ -43,13 +43,13 @@ public class MediaStoreService {
         );
     }
 
-    private String getMediaSelectionTakenAfter(LocalDate date) {
+    private String getMediaSelectionTakenAfter(LocalDateTime date) {
         return "(" + MediaStore.Files.FileColumns.MEDIA_TYPE + "="
                 + MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
                 + " OR "
                 + MediaStore.Files.FileColumns.MEDIA_TYPE + "="
                 + MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO + ")"
                 + " AND "
-                + MediaStore.Files.FileColumns.DATE_TAKEN + " >= " + date.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli();
+                + MediaStore.Files.FileColumns.DATE_TAKEN + " >= " + date.toInstant(ZoneOffset.UTC).toEpochMilli();
     }
 }

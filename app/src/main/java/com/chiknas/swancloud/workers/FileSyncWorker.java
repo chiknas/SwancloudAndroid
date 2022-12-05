@@ -20,8 +20,7 @@ import com.chiknas.swancloud.services.MediaStoreService;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -37,12 +36,12 @@ import retrofit2.Response;
  * uploaded yet). Then proceeds to upload each file one by one.
  * This is preferred instead of a batch upload, in case something goes wrong, we will be able
  * to resume upload from where we left off by just getting the new lastUploadedFileDate from the server.
- *
+ * <p>
  * Call this worker using one of the following methods:
  * Periodic work:
  * PeriodicWorkRequest periodicFileSyncWorkRequest = new PeriodicWorkRequest.Builder(FileSyncWorker.class, 1, TimeUnit.HOURS).setConstraints(constraints).build();
  * WorkManager.getInstance(context).enqueueUniquePeriodicWork("FileSyncWorker", ExistingPeriodicWorkPolicy.REPLACE, periodicFileSyncWorkRequest);
- *
+ * <p>
  * One time work:
  * OneTimeWorkRequest periodicFileSyncWorkRequest = new OneTimeWorkRequest.Builder(FileSyncWorker.class).build();
  * WorkManager.getInstance(context).enqueueUniqueWork("FileSyncWorker", ExistingWorkPolicy.REPLACE, periodicFileSyncWorkRequest);
@@ -71,7 +70,7 @@ public class FileSyncWorker extends Worker {
         }
 
         // Select only files that are created after the last uploaded file
-        LocalDate lastUploadedFileDate = currentUserDetails.get().getLastUploadedFileDate();
+        LocalDateTime lastUploadedFileDate = currentUserDetails.get().getLastUploadedFileDate();
 
         try (Cursor cursor = mediaStoreService.getMediaTakenAfter(lastUploadedFileDate)) {
             uploadFiles(cursor);

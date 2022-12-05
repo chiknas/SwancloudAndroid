@@ -22,14 +22,15 @@ public class AutoLoginActivity extends AppCompatActivity {
         SharedPreferences swancloudSharedPreferences = getApplicationContext().getSharedPreferences("swancloud", MODE_PRIVATE);
         long refreshTokenExpiry = swancloudSharedPreferences.getLong(AuthenticationSharedPreferences.REFRESH_TOKEN_EXPIRY, 0);
 
-        LocalDateTime refreshTokenExpiryDate = LocalDateTime.ofInstant(Instant.ofEpochMilli(refreshTokenExpiry),
+        LocalDateTime refreshTokenExpiryDate = LocalDateTime.ofInstant(Instant.ofEpochSecond(refreshTokenExpiry),
                         TimeZone.getDefault().toZoneId());
 
         boolean isSessionExpired = refreshTokenExpiryDate.isBefore(LocalDateTime.now());
         if(isSessionExpired){
             startActivity(new Intent(this, LoginActivity.class));
+        }else{
+            startActivity(new Intent(this, HomeActivity.class));
         }
 
-        startActivity(new Intent(this, HomeActivity.class));
     }
 }
