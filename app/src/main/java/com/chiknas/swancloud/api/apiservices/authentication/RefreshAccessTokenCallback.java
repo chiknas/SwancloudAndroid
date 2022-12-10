@@ -1,7 +1,7 @@
 package com.chiknas.swancloud.api.apiservices.authentication;
 
 import static android.content.Context.MODE_PRIVATE;
-import static android.widget.Toast.LENGTH_SHORT;
+import static android.widget.Toast.LENGTH_LONG;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -37,7 +37,7 @@ public class RefreshAccessTokenCallback implements Callback<RefreshTokenResponse
 
         Optional<RefreshTokenResponse> responseBody = Optional.ofNullable(response.body());
         if (!response.isSuccessful() || !responseBody.isPresent()) {
-            Toast.makeText(context, "Network error!", LENGTH_SHORT).show();
+            Toast.makeText(context, "Network error!", LENGTH_LONG).show();
             return;
         }
 
@@ -61,6 +61,6 @@ public class RefreshAccessTokenCallback implements Callback<RefreshTokenResponse
 
     @Override
     public void onFailure(@NonNull Call<RefreshTokenResponse> call, @NonNull Throwable t) {
-        Toast.makeText(context, "Nope!", LENGTH_SHORT).show();
+        Toast.makeText(context, "Nope!", LENGTH_LONG).show();
     }
 }

@@ -43,6 +43,7 @@ public class RefreshAccessTokenInterceptor implements Interceptor {
             return initialResponse;
         }
 
+        initialResponse.close();
         refreshAccessToken(chain);
 
         return chain.proceed(initialRequest);
